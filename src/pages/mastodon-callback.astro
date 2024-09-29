@@ -1,0 +1,61 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const code = Astro.url.searchParams.get('code');
+let error = null;
+let success = false;
+let accessToken = null;
+
+if (code) {
+  try {
+    const tokenResponse = await fetch('https://thamizhi.xyz/oauth/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        client_id: 'nbmCFlpGO3uFnQxm1rzPzN2NOmlkLwcffkVU6zvlYQc',
+        client_secret: 'm6m12NvWEx_5jD2_Mxis4o5QGE4am-cZN1yTRTalero',
+        redirect_uri: `${Astro.url.origin}/mastodon-callback`,
+        grant_type: 'authorization_code',
+        code: code,
+        scope: 'read write follow',
+      }),
+    });
+
+    if (tokenResponse.ok) {
+      const tokenData = await tokenResponse.json();
+      accessToken = tokenData.access_token;
+      success = true;
+    } else {
+      throw new Error('Failed to obtain access token');
+    }
+  } catch (e) {
+    console.error('Error in Mastodon callback:', e);
+    error = e instanceof Error ? e.message : String(e);
+  }
+} else {
+  error = 'No authorization code received';
+}
+---
+
+<Layout title="Mastodon Connection - Journalism App">
+  <main class="max-w-3xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+    <h1 class="text-2xl font-semibold text-gray-900 mb-6">Mastodon Connection</h1>
+    {error && <p class="text-red-500">{error}</p>}
+    {success && <p class="text-green-500">Successfully connected your Mastodon account!</p>}
+    <a href="/settings" class="mt-4 inline-block text-blue-500 hover:underline">Return to Settings</a>
+  </main>
+</Layout>
+
+<script define:vars={{ accessToken, success }}>
+  if (accessToken) {
+    localStorage.setItem('mastodon_access_token', accessToken);
+    if (window.opener) {
+      window.opener.postMessage({ type: 'mastodon_connected', success: success }, '*');
+      window.close();
+    } else {
+      window.location.href = '/settings';
+    }
+  }
+</script>

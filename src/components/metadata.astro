@@ -1,0 +1,107 @@
+---
+const collections = ['Genocide', 'Nature', 'Politics', 'Technology', 'Culture'];
+---
+
+<div id="metadataContent" class="h-full overflow-y-auto p-6 bg-white">
+  <h2 class="text-3xl font-bold mb-8 text-gray-800">Metadata</h2>
+  <form>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="md:col-span-1">
+        <label for="feature-image" class="block mb-2 text-sm font-medium text-gray-900">Feature Image</label>
+        <div id="imagePreview" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full aspect-square overflow-hidden cursor-pointer">
+          <input id="feature-image" name="feature-image" type="file" class="hidden" accept="image/*">
+          <div class="h-full flex items-center justify-center">
+            <p class="text-center text-gray-500">Click to upload or drag and drop</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="md:col-span-1 space-y-6">
+        <div>
+          <label for="datetime" class="block mb-2 text-sm font-medium text-gray-900">Publish Date and Time</label>
+          <input type="datetime-local" name="datetime" id="datetime" required class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+        </div>
+
+        <div>
+          <label for="authors" class="block mb-2 text-sm font-medium text-gray-900">Authors</label>
+          <input type="text" name="authors" id="authors" placeholder="Add authors" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+        </div>
+
+        <div>
+          <label for="collection" class="block mb-2 text-sm font-medium text-gray-900">Collection</label>
+          <select id="collection" name="collection" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+            <option value="">Select a collection</option>
+            {collections.map((collection) => (
+              <option value={collection}>{collection}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label for="location" class="block mb-2 text-sm font-medium text-gray-900">Location</label>
+          <input type="text" name="location" id="location" placeholder="Add location" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+        </div>
+
+        <div>
+          <label for="tags" class="block mb-2 text-sm font-medium text-gray-900">Tags</label>
+          <input type="text" name="tags" id="tags" placeholder="Add tags (comma-separated)" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+        </div>
+      </div>
+
+      <div class="md:col-span-2">
+        <label for="excerpt" class="block mb-2 text-sm font-medium text-gray-900">Excerpt</label>
+        <textarea name="excerpt" id="excerpt" rows="3" placeholder="Write a short excerpt" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"></textarea>
+      </div>
+
+      <div class="md:col-span-2">
+        <label for="metadata" class="block mb-2 text-sm font-medium text-gray-900">SEO Description</label>
+        <textarea name="metadata" id="metadata" rows="3" placeholder="SEO description" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"></textarea>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+  let selectedFeatureImage: File | null = null;
+
+  const featureImageInput = document.getElementById('feature-image') as HTMLInputElement;
+  const imagePreview = document.getElementById('imagePreview');
+
+  imagePreview?.addEventListener('click', () => {
+    featureImageInput?.click();
+  });
+
+  featureImageInput?.addEventListener('change', async (event) => {
+    const file = featureImageInput.files?.[0];
+    if (file && imagePreview) {
+      selectedFeatureImage = file;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        imagePreview.innerHTML = `
+          <img src="${e.target?.result}" alt="Feature Image Preview" class="w-full h-full object-cover">
+        `;
+      }
+      reader.readAsDataURL(file);
+    }
+  });
+
+  // Add drag and drop functionality
+  imagePreview?.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    imagePreview.classList.add('border-blue-500');
+  });
+
+  imagePreview?.addEventListener('dragleave', () => {
+    imagePreview?.classList.remove('border-blue-500');
+  });
+
+  imagePreview?.addEventListener('drop', (e) => {
+    e.preventDefault();
+    imagePreview?.classList.remove('border-blue-500');
+    if (e.dataTransfer?.files.length) {
+      featureImageInput.files = e.dataTransfer.files;
+      const changeEvent = new Event('change');
+      featureImageInput.dispatchEvent(changeEvent);
+    }
+  });
+</script>

@@ -1,0 +1,828 @@
+---
+// Sample data - replace this with your actual data source
+const incidents = [
+  { id: 1, name: "John Doe", incident: "Traffic Violation", location: "New York" },
+  { id: 2, name: "Jane Smith", incident: "Noise Complaint", location: "Los Angeles" },
+  { id: 3, name: "Bob Johnson", incident: "Theft", location: "Chicago" },
+  { id: 4, name: "Alice Brown", incident: "Vandalism", location: "Houston" },
+  { id: 5, name: "Charlie Davis", incident: "Assault", location: "Phoenix" },
+];
+
+const itemsPerPage = 5;
+const totalPages = Math.ceil(incidents.length / itemsPerPage);
+
+const incidentTypes = ['Crime', 'Accident', 'Natural Disaster', 'Other'];
+const severityLevels = ['Minor', 'Major', 'Critical'];
+const statusOptions = ['Stable', 'Critical', 'Deceased', 'At Large', 'Arrested'];
+const evidenceTypes = ['Physical', 'Digital', 'Testimonial'];
+const mediaTypes = ['Photo', 'Video', 'Audio'];
+const reportStatuses = ['Draft', 'Published', 'Archived'];
+const genderOptions = ['Male', 'Female', 'Other', 'Prefer not to say'];
+---
+
+<div id="dataContent" class="bg-white h-full overflow-y-auto">
+  <div id="dataTable" class="bg-white">
+    <div class="pb-4 bg-white p-4">
+      <form class="flex items-center max-w-lg">   
+        <label for="table-search" class="sr-only">Search</label>
+        <div class="relative w-full">
+          <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+            <svg class="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+            </svg>
+          </div>
+          <input type="text" id="table-search" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5" placeholder="Search for items" />
+        </div>
+        <button type="submit" class="p-2.5 ms-2 text-sm font-medium text-white bg-blue-700 rounded-lg border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300">
+          <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+          </svg>
+          <span class="sr-only">Search</span>
+        </button>
+        <button type="button" id="addIncidentBtn" class="p-2.5 ms-2 text-sm font-medium text-white bg-blue-700 rounded-lg border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300">
+          <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16"/>
+          </svg>
+          <span class="sr-only">Add item</span>
+        </button>
+      </form>
+    </div>
+    <table class="w-full text-sm text-left text-gray-500">
+      <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+        <tr>
+          <th scope="col" class="p-4">
+            <div class="flex items-center">
+              <input id="checkbox-all-search" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+              <label for="checkbox-all-search" class="sr-only">checkbox</label>
+            </div>
+          </th>
+          <th scope="col" class="px-6 py-3">Name</th>
+          <th scope="col" class="px-6 py-3">Incident</th>
+          <th scope="col" class="px-6 py-3">Location</th>
+          <th scope="col" class="px-6 py-3">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {incidents.map((incident) => (
+          <tr class="bg-white hover:bg-gray-50">
+            <td class="w-4 p-4">
+              <div class="flex items-center">
+                <input id={`checkbox-table-search-${incident.id}`} type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                <label for={`checkbox-table-search-${incident.id}`} class="sr-only">checkbox</label>
+              </div>
+            </td>
+            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+              {incident.name}
+            </th>
+            <td class="px-6 py-4">{incident.incident}</td>
+            <td class="px-6 py-4">{incident.location}</td>
+            <td class="px-6 py-4">
+              <a href="#" class="font-medium text-blue-600 hover:underline">Edit</a>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    <nav class="flex items-center justify-between p-4" aria-label="Table navigation">
+      <span class="text-sm font-normal text-gray-500 mb-4 md:mb-0 block w-full md:inline md:w-auto">
+        Showing <span class="font-semibold text-gray-900">1-{Math.min(itemsPerPage, incidents.length)}</span> of <span class="font-semibold text-gray-900">{incidents.length}</span>
+      </span>
+      <ul class="inline-flex -space-x-px text-sm h-8">
+        <li>
+          <a href="#" class="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700">Previous</a>
+        </li>
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+          <li>
+            <a href="#" class={`flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 ${page === 1 ? 'text-blue-600 bg-blue-50 hover:bg-blue-100 hover:text-blue-700' : ''}`}>{page}</a>
+          </li>
+        ))}
+        <li>
+          <a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700">Next</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+
+  <!-- Add Incident Form (initially hidden) -->
+  <div id="addIncidentForm" class="hidden bg-white p-6 border-t-2 border-gray-200">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-semibold text-gray-900">Add New Incident</h3>
+      <div class="flex items-center">
+        <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2">Add Incident</button>
+        <button id="closeModalIcon" class="text-gray-400 hover:text-gray-500">
+          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="mb-4">
+      <div class="border-b border-gray-200">
+        <nav class="-mb-px flex overflow-x-auto" aria-label="Tabs">
+          <button class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" data-tab="incident">Incident Details</button>
+          <button class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ml-8" data-tab="victim">Victim Details</button>
+          <button class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ml-8" data-tab="perpetrator">Perpetrator Details</button>
+          <button class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ml-8" data-tab="witness">Witness Details</button>
+          <button class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ml-8" data-tab="evidence">Evidence & Media</button>
+          <button class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ml-8" data-tab="reporting">Reporting & Analysis</button>
+          <button class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ml-8" data-tab="legal">Legal Details</button>
+          <button class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ml-8" data-tab="additionalNotes">Additional Notes</button>
+        </nav>
+      </div>
+    </div>
+    <form id="newIncidentForm" class="space-y-4">
+      <div id="incidentTab" class="tab-content">
+        <div class="grid gap-6 mb-6 md:grid-cols-2">
+          <div>
+            <label for="incidentId" class="block mb-2 text-sm font-medium text-gray-900">Incident ID</label>
+            <input type="text" id="incidentId" name="incidentId" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Unique identifier" required>
+          </div>
+          <div>
+            <label for="incidentTitle" class="block mb-2 text-sm font-medium text-gray-900">Incident Title</label>
+            <input type="text" id="incidentTitle" name="incidentTitle" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Brief title" required>
+          </div>
+          <div>
+            <label for="incidentDate" class="block mb-2 text-sm font-medium text-gray-900">Date and Time</label>
+            <input type="datetime-local" id="incidentDate" name="incidentDate" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required>
+          </div>
+          <div>
+            <label for="incidentLocation" class="block mb-2 text-sm font-medium text-gray-900">Location</label>
+            <input type="text" id="incidentLocation" name="incidentLocation" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Address, city, state, country, GPS" required>
+          </div>
+          <div>
+            <label for="incidentType" class="block mb-2 text-sm font-medium text-gray-900">Type of Incident</label>
+            <select id="incidentType" name="incidentType" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required>
+              <option value="">Select type</option>
+              {incidentTypes.map((type) => (
+                <option value={type}>{type}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label for="incidentSeverity" class="block mb-2 text-sm font-medium text-gray-900">Severity</label>
+            <select id="incidentSeverity" name="incidentSeverity" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required>
+              <option value="">Select severity</option>
+              {severityLevels.map((level) => (
+                <option value={level}>{level}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div>
+          <label for="incidentDescription" class="block mb-2 text-sm font-medium text-gray-900">Description</label>
+          <textarea id="incidentDescription" name="incidentDescription" rows="3" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Detailed description of the incident"></textarea>
+        </div>
+      </div>
+
+      <div id="victimTab" class="tab-content hidden">
+        <!-- Victim Details fields -->
+        <div class="grid gap-6 mb-6 md:grid-cols-2">
+          <div>
+            <label for="victimId" class="block mb-2 text-sm font-medium text-gray-900">Victim ID</label>
+            <input type="text" id="victimId" name="victimId" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Unique identifier">
+          </div>
+          <div>
+            <label for="victimName" class="block mb-2 text-sm font-medium text-gray-900">Victim Name</label>
+            <input type="text" id="victimName" name="victimName" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Full name">
+          </div>
+          <div>
+            <label for="victimAge" class="block mb-2 text-sm font-medium text-gray-900">Victim Age</label>
+            <input type="number" id="victimAge" name="victimAge" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Age">
+          </div>
+          <div>
+            <label for="victimGender" class="block mb-2 text-sm font-medium text-gray-900">Victim Gender</label>
+            <select id="victimGender" name="victimGender" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+              <option value="">Select gender</option>
+              {genderOptions.map((gender) => (
+                <option value={gender}>{gender}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label for="victimOccupation" class="block mb-2 text-sm font-medium text-gray-900">Victim Occupation</label>
+            <input type="text" id="victimOccupation" name="victimOccupation" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Occupation">
+          </div>
+          <div>
+            <label for="victimContact" class="block mb-2 text-sm font-medium text-gray-900">Victim Contact Information</label>
+            <input type="text" id="victimContact" name="victimContact" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Phone, email, address">
+          </div>
+          <div>
+            <label for="victimCaste" class="block mb-2 text-sm font-medium text-gray-900">Victim Caste</label>
+            <input type="text" id="victimCaste" name="victimCaste" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Caste">
+          </div>
+          <div>
+            <label for="victimClass" class="block mb-2 text-sm font-medium text-gray-900">Victim Class</label>
+            <input type="text" id="victimClass" name="victimClass" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Social or economic class">
+          </div>
+        </div>
+        <div>
+          <label for="victimInjuries" class="block mb-2 text-sm font-medium text-gray-900">Injuries</label>
+          <textarea id="victimInjuries" name="victimInjuries" rows="2" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Description of injuries sustained"></textarea>
+        </div>
+        <div>
+          <label for="victimTreatment" class="block mb-2 text-sm font-medium text-gray-900">Medical Treatment</label>
+          <textarea id="victimTreatment" name="victimTreatment" rows="2" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Details of medical treatment received"></textarea>
+        </div>
+        <div>
+          <label for="victimStatus" class="block mb-2 text-sm font-medium text-gray-900">Victim Status</label>
+          <select id="victimStatus" name="victimStatus" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+            <option value="">Select status</option>
+            {statusOptions.map((status) => (
+              <option value={status}>{status}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div id="perpetratorTab" class="tab-content hidden">
+        <div class="grid gap-6 mb-6 md:grid-cols-2">
+          <div>
+            <label for="perpetratorId" class="block mb-2 text-sm font-medium text-gray-900">Perpetrator ID</label>
+            <input type="text" id="perpetratorId" name="perpetratorId" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Unique identifier">
+          </div>
+          <div>
+            <label for="perpetratorName" class="block mb-2 text-sm font-medium text-gray-900">Name</label>
+            <input type="text" id="perpetratorName" name="perpetratorName" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Full name">
+          </div>
+          <div>
+            <label for="perpetratorAge" class="block mb-2 text-sm font-medium text-gray-900">Age</label>
+            <input type="number" id="perpetratorAge" name="perpetratorAge" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Age">
+          </div>
+          <div>
+            <label for="perpetratorGender" class="block mb-2 text-sm font-medium text-gray-900">Gender</label>
+            <select id="perpetratorGender" name="perpetratorGender" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+              <option value="">Select gender</option>
+              {genderOptions.map((gender) => (
+                <option value={gender}>{gender}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label for="perpetratorOccupation" class="block mb-2 text-sm font-medium text-gray-900">Occupation</label>
+            <input type="text" id="perpetratorOccupation" name="perpetratorOccupation" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Occupation">
+          </div>
+          <div>
+            <label for="perpetratorContact" class="block mb-2 text-sm font-medium text-gray-900">Contact Information</label>
+            <input type="text" id="perpetratorContact" name="perpetratorContact" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Phone, email, address">
+          </div>
+          <div>
+            <label for="perpetratorCriminalRecord" class="block mb-2 text-sm font-medium text-gray-900">Criminal Record</label>
+            <textarea id="perpetratorCriminalRecord" name="perpetratorCriminalRecord" rows="2" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Details of any previous criminal record"></textarea>
+          </div>
+          <div>
+            <label for="perpetratorStatus" class="block mb-2 text-sm font-medium text-gray-900">Status</label>
+            <select id="perpetratorStatus" name="perpetratorStatus" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+              <option value="">Select status</option>
+              {statusOptions.map((status) => (
+                <option value={status}>{status}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div id="witnessTab" class="tab-content hidden">
+        <div class="grid gap-6 mb-6 md:grid-cols-2">
+          <div>
+            <label for="witnessId" class="block mb-2 text-sm font-medium text-gray-900">Witness ID</label>
+            <input type="text" id="witnessId" name="witnessId" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Unique identifier">
+          </div>
+          <div>
+            <label for="witnessName" class="block mb-2 text-sm font-medium text-gray-900">Name</label>
+            <input type="text" id="witnessName" name="witnessName" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Full name">
+          </div>
+          <div>
+            <label for="witnessAge" class="block mb-2 text-sm font-medium text-gray-900">Age</label>
+            <input type="number" id="witnessAge" name="witnessAge" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Age">
+          </div>
+          <div>
+            <label for="witnessGender" class="block mb-2 text-sm font-medium text-gray-900">Gender</label>
+            <select id="witnessGender" name="witnessGender" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+              <option value="">Select gender</option>
+              {genderOptions.map((gender) => (
+                <option value={gender}>{gender}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label for="witnessOccupation" class="block mb-2 text-sm font-medium text-gray-900">Occupation</label>
+            <input type="text" id="witnessOccupation" name="witnessOccupation" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Occupation">
+          </div>
+          <div>
+            <label for="witnessContact" class="block mb-2 text-sm font-medium text-gray-900">Contact Information</label>
+            <input type="text" id="witnessContact" name="witnessContact" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Phone, email, address">
+          </div>
+        </div>
+        <div>
+          <label for="witnessStatement" class="block mb-2 text-sm font-medium text-gray-900">Statement</label>
+          <textarea id="witnessStatement" name="witnessStatement" rows="3" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Detailed statement provided by the witness"></textarea>
+        </div>
+      </div>
+
+      <div id="evidenceTab" class="tab-content hidden">
+        <div class="grid gap-6 mb-6 md:grid-cols-2">
+          <div>
+            <label for="evidenceType" class="block mb-2 text-sm font-medium text-gray-900">Type of Evidence</label>
+            <select id="evidenceType" name="evidenceType" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+              <option value="">Select type</option>
+              {evidenceTypes.map((type) => (
+                <option value={type}>{type}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label for="evidenceDescription" class="block mb-2 text-sm font-medium text-gray-900">Description</label>
+            <textarea id="evidenceDescription" name="evidenceDescription" rows="2" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Description of the evidence"></textarea>
+          </div>
+        </div>
+        <div>
+          <label for="mediaType" class="block mb-2 text-sm font-medium text-gray-900">Type of Media</label>
+          <select id="mediaType" name="mediaType" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+            <option value="">Select type</option>
+            {mediaTypes.map((type) => (
+              <option value={type}>{type}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label for="mediaDescription" class="block mb-2 text-sm font-medium text-gray-900">Description</label>
+          <textarea id="mediaDescription" name="mediaDescription" rows="2" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Description of the media"></textarea>
+        </div>
+        <div>
+          <label for="mediaFiles" class="block mb-2 text-sm font-medium text-gray-900">Upload Media Files</label>
+          <input type="file" id="mediaFiles" name="mediaFiles" multiple class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+        </div>
+      </div>
+
+      <div id="reportingTab" class="tab-content hidden">
+        <div class="grid gap-6 mb-6 md:grid-cols-2">
+          <div>
+            <label for="reportStatus" class="block mb-2 text-sm font-medium text-gray-900">Report Status</label>
+            <select id="reportStatus" name="reportStatus" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+              <option value="">Select status</option>
+              {reportStatuses.map((status) => (
+                <option value={status}>{status}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label for="reportDate" class="block mb-2 text-sm font-medium text-gray-900">Report Date</label>
+            <input type="date" id="reportDate" name="reportDate" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+          </div>
+        </div>
+        <div>
+          <label for="analysis" class="block mb-2 text-sm font-medium text-gray-900">Analysis</label>
+          <textarea id="analysis" name="analysis" rows="3" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Analysis of the incident"></textarea>
+        </div>
+      </div>
+
+      <div id="legalTab" class="tab-content hidden">
+        <div class="grid gap-6 mb-6 md:grid-cols-2">
+          <div>
+            <label for="legalCaseNumber" class="block mb-2 text-sm font-medium text-gray-900">Case Number</label>
+            <input type="text" id="legalCaseNumber" name="legalCaseNumber" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Legal case number">
+          </div>
+          <div>
+            <label for="legalStatus" class="block mb-2 text-sm font-medium text-gray-900">Status</label>
+            <select id="legalStatus" name="legalStatus" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+              <option value="">Select status</option>
+              {statusOptions.map((status) => (
+                <option value={status}>{status}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div>
+          <label for="legalNotes" class="block mb-2 text-sm font-medium text-gray-900">Notes</label>
+          <textarea id="legalNotes" name="legalNotes" rows="3" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Legal notes"></textarea>
+        </div>
+      </div>
+
+      <div id="additionalNotesTab" class="tab-content hidden">
+        <div>
+          <label for="comments" class="block mb-2 text-sm font-medium text-gray-900">Comments</label>
+          <textarea id="comments" name="comments" rows="3" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Any additional comments or notes"></textarea>
+        </div>
+        <div>
+          <label for="attachments" class="block mb-2 text-sm font-medium text-gray-900">Attachments</label>
+          <input type="file" id="attachments" name="attachments" multiple class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+  <!-- Add Incident Form (initially hidden) -->
+  <div id="addIncidentForm" class="hidden bg-white p-6 border-t-2 border-gray-200">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-semibold text-gray-900">Add New Incident</h3>
+      <button id="closeModalIcon" class="text-gray-400 hover:text-gray-500">
+        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    <div class="mb-4">
+      <div class="border-b border-gray-200">
+        <nav class="-mb-px flex overflow-x-auto" aria-label="Tabs">
+          <button class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" data-tab="incident">Incident Details</button>
+          <button class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ml-8" data-tab="victim">Victim Details</button>
+          <button class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ml-8" data-tab="perpetrator">Perpetrator Details</button>
+          <button class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ml-8" data-tab="witness">Witness Details</button>
+          <button class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ml-8" data-tab="evidence">Evidence & Media</button>
+          <button class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ml-8" data-tab="reporting">Reporting & Analysis</button>
+          <button class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ml-8" data-tab="legal">Legal Details</button>
+          <button class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ml-8" data-tab="additionalNotes">Additional Notes</button>
+        </nav>
+      </div>
+    </div>
+    <form id="newIncidentForm" class="space-y-4">
+      <div id="incidentTab" class="tab-content">
+        <div class="grid gap-6 mb-6 md:grid-cols-2">
+          <div>
+            <label for="incidentId" class="block mb-2 text-sm font-medium text-gray-900">Incident ID</label>
+            <input type="text" id="incidentId" name="incidentId" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Unique identifier" required>
+          </div>
+          <div>
+            <label for="incidentTitle" class="block mb-2 text-sm font-medium text-gray-900">Incident Title</label>
+            <input type="text" id="incidentTitle" name="incidentTitle" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Brief title" required>
+          </div>
+          <div>
+            <label for="incidentDate" class="block mb-2 text-sm font-medium text-gray-900">Date and Time</label>
+            <input type="datetime-local" id="incidentDate" name="incidentDate" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required>
+          </div>
+          <div>
+            <label for="incidentLocation" class="block mb-2 text-sm font-medium text-gray-900">Location</label>
+            <input type="text" id="incidentLocation" name="incidentLocation" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Address, city, state, country, GPS" required>
+          </div>
+          <div>
+            <label for="incidentType" class="block mb-2 text-sm font-medium text-gray-900">Type of Incident</label>
+            <select id="incidentType" name="incidentType" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required>
+              <option value="">Select type</option>
+              {incidentTypes.map((type) => (
+                <option value={type}>{type}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label for="incidentSeverity" class="block mb-2 text-sm font-medium text-gray-900">Severity</label>
+            <select id="incidentSeverity" name="incidentSeverity" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required>
+              <option value="">Select severity</option>
+              {severityLevels.map((level) => (
+                <option value={level}>{level}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div>
+          <label for="incidentDescription" class="block mb-2 text-sm font-medium text-gray-900">Description</label>
+          <textarea id="incidentDescription" name="incidentDescription" rows="3" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Detailed description of the incident"></textarea>
+        </div>
+      </div>
+
+      <div id="victimTab" class="tab-content hidden">
+        <!-- Victim Details fields -->
+        <div class="grid gap-6 mb-6 md:grid-cols-2">
+          <div>
+            <label for="victimId" class="block mb-2 text-sm font-medium text-gray-900">Victim ID</label>
+            <input type="text" id="victimId" name="victimId" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Unique identifier">
+          </div>
+          <div>
+            <label for="victimName" class="block mb-2 text-sm font-medium text-gray-900">Victim Name</label>
+            <input type="text" id="victimName" name="victimName" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Full name">
+          </div>
+          <div>
+            <label for="victimAge" class="block mb-2 text-sm font-medium text-gray-900">Victim Age</label>
+            <input type="number" id="victimAge" name="victimAge" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Age">
+          </div>
+          <div>
+            <label for="victimGender" class="block mb-2 text-sm font-medium text-gray-900">Victim Gender</label>
+            <select id="victimGender" name="victimGender" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+              <option value="">Select gender</option>
+              {genderOptions.map((gender) => (
+                <option value={gender}>{gender}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label for="victimOccupation" class="block mb-2 text-sm font-medium text-gray-900">Victim Occupation</label>
+            <input type="text" id="victimOccupation" name="victimOccupation" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Occupation">
+          </div>
+          <div>
+            <label for="victimContact" class="block mb-2 text-sm font-medium text-gray-900">Victim Contact Information</label>
+            <input type="text" id="victimContact" name="victimContact" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Phone, email, address">
+          </div>
+          <div>
+            <label for="victimCaste" class="block mb-2 text-sm font-medium text-gray-900">Victim Caste</label>
+            <input type="text" id="victimCaste" name="victimCaste" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Caste">
+          </div>
+          <div>
+            <label for="victimClass" class="block mb-2 text-sm font-medium text-gray-900">Victim Class</label>
+            <input type="text" id="victimClass" name="victimClass" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Social or economic class">
+          </div>
+        </div>
+        <div>
+          <label for="victimInjuries" class="block mb-2 text-sm font-medium text-gray-900">Injuries</label>
+          <textarea id="victimInjuries" name="victimInjuries" rows="2" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Description of injuries sustained"></textarea>
+        </div>
+        <div>
+          <label for="victimTreatment" class="block mb-2 text-sm font-medium text-gray-900">Medical Treatment</label>
+          <textarea id="victimTreatment" name="victimTreatment" rows="2" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Details of medical treatment received"></textarea>
+        </div>
+        <div>
+          <label for="victimStatus" class="block mb-2 text-sm font-medium text-gray-900">Victim Status</label>
+          <select id="victimStatus" name="victimStatus" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+            <option value="">Select status</option>
+            {statusOptions.map((status) => (
+              <option value={status}>{status}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div id="perpetratorTab" class="tab-content hidden">
+        <div class="grid gap-6 mb-6 md:grid-cols-2">
+          <div>
+            <label for="perpetratorId" class="block mb-2 text-sm font-medium text-gray-900">Perpetrator ID</label>
+            <input type="text" id="perpetratorId" name="perpetratorId" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Unique identifier">
+          </div>
+          <div>
+            <label for="perpetratorName" class="block mb-2 text-sm font-medium text-gray-900">Name</label>
+            <input type="text" id="perpetratorName" name="perpetratorName" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Full name">
+          </div>
+          <div>
+            <label for="perpetratorAge" class="block mb-2 text-sm font-medium text-gray-900">Age</label>
+            <input type="number" id="perpetratorAge" name="perpetratorAge" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Age">
+          </div>
+          <div>
+            <label for="perpetratorGender" class="block mb-2 text-sm font-medium text-gray-900">Gender</label>
+            <select id="perpetratorGender" name="perpetratorGender" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+              <option value="">Select gender</option>
+              {genderOptions.map((gender) => (
+                <option value={gender}>{gender}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label for="perpetratorOccupation" class="block mb-2 text-sm font-medium text-gray-900">Occupation</label>
+            <input type="text" id="perpetratorOccupation" name="perpetratorOccupation" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Occupation">
+          </div>
+          <div>
+            <label for="perpetratorContact" class="block mb-2 text-sm font-medium text-gray-900">Contact Information</label>
+            <input type="text" id="perpetratorContact" name="perpetratorContact" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Phone, email, address">
+          </div>
+        </div>
+        <div class="mb-6">
+          <label for="perpetratorCriminalRecord" class="block mb-2 text-sm font-medium text-gray-900">Criminal Record</label>
+          <textarea id="perpetratorCriminalRecord" name="perpetratorCriminalRecord" rows="3" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Details of any previous criminal record"></textarea>
+        </div>
+        <div>
+          <label for="perpetratorStatus" class="block mb-2 text-sm font-medium text-gray-900">Status</label>
+          <select id="perpetratorStatus" name="perpetratorStatus" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+            <option value="">Select status</option>
+            {statusOptions.map((status) => (
+              <option value={status}>{status}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div id="witnessTab" class="tab-content hidden">
+        <div class="grid gap-6 mb-6 md:grid-cols-2">
+          <div>
+            <label for="witnessId" class="block mb-2 text-sm font-medium text-gray-900">Witness ID</label>
+            <input type="text" id="witnessId" name="witnessId" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Unique identifier">
+          </div>
+          <div>
+            <label for="witnessName" class="block mb-2 text-sm font-medium text-gray-900">Name</label>
+            <input type="text" id="witnessName" name="witnessName" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Full name">
+          </div>
+          <div>
+            <label for="witnessAge" class="block mb-2 text-sm font-medium text-gray-900">Age</label>
+            <input type="number" id="witnessAge" name="witnessAge" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Age">
+          </div>
+          <div>
+            <label for="witnessGender" class="block mb-2 text-sm font-medium text-gray-900">Gender</label>
+            <select id="witnessGender" name="witnessGender" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+              <option value="">Select gender</option>
+              {genderOptions.map((gender) => (
+                <option value={gender}>{gender}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label for="witnessOccupation" class="block mb-2 text-sm font-medium text-gray-900">Occupation</label>
+            <input type="text" id="witnessOccupation" name="witnessOccupation" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Occupation">
+          </div>
+          <div>
+            <label for="witnessContact" class="block mb-2 text-sm font-medium text-gray-900">Contact Information</label>
+            <input type="text" id="witnessContact" name="witnessContact" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Phone, email, address">
+          </div>
+        </div>
+        <div>
+          <label for="witnessStatement" class="block mb-2 text-sm font-medium text-gray-900">Statement</label>
+          <textarea id="witnessStatement" name="witnessStatement" rows="4" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Detailed statement provided by the witness"></textarea>
+        </div>
+      </div>
+
+      <div id="evidenceTab" class="tab-content hidden">
+        <!-- Evidence & Media fields -->
+        <div class="grid gap-6 mb-6 md:grid-cols-2">
+          <div>
+            <label for="evidenceId" class="block mb-2 text-sm font-medium text-gray-900">Evidence ID</label>
+            <input type="text" id="evidenceId" name="evidenceId" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Unique identifier">
+          </div>
+          <div>
+            <label for="evidenceType" class="block mb-2 text-sm font-medium text-gray-900">Type of Evidence</label>
+            <select id="evidenceType" name="evidenceType" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+              <option value="">Select type</option>
+              {evidenceTypes.map((type) => (
+                <option value={type}>{type}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label for="evidenceDescription" class="block mb-2 text-sm font-medium text-gray-900">Description</label>
+            <textarea id="evidenceDescription" name="evidenceDescription" rows="2" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Description of the evidence"></textarea>
+          </div>
+          <div>
+            <label for="evidenceMedia" class="block mb-2 text-sm font-medium text-gray-900">Media</label>
+            <select id="evidenceMedia" name="evidenceMedia" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+              <option value="">Select media type</option>
+              {mediaTypes.map((type) => (
+                <option value={type}>{type}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div>
+          <label for="evidenceNotes" class="block mb-2 text-sm font-medium text-gray-900">Notes</label>
+          <textarea id="evidenceNotes" name="evidenceNotes" rows="3" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Additional notes about the evidence"></textarea>
+        </div>
+      </div>
+
+      <div id="reportingTab" class="tab-content hidden">
+        <!-- Reporting & Analysis fields -->
+        <div class="grid gap-6 mb-6 md:grid-cols-2">
+          <div>
+            <label for="reportId" class="block mb-2 text-sm font-medium text-gray-900">Report ID</label>
+            <input type="text" id="reportId" name="reportId" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Unique identifier">
+          </div>
+          <div>
+            <label for="reportTitle" class="block mb-2 text-sm font-medium text-gray-900">Report Title</label>
+            <input type="text" id="reportTitle" name="reportTitle" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Title of the report">
+          </div>
+          <div>
+            <label for="reportDate" class="block mb-2 text-sm font-medium text-gray-900">Date</label>
+            <input type="date" id="reportDate" name="reportDate" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+          </div>
+          <div>
+            <label for="reportStatus" class="block mb-2 text-sm font-medium text-gray-900">Status</label>
+            <select id="reportStatus" name="reportStatus" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+              <option value="">Select status</option>
+              {reportStatuses.map((status) => (
+                <option value={status}>{status}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div>
+          <label for="reportSummary" class="block mb-2 text-sm font-medium text-gray-900">Summary</label>
+          <textarea id="reportSummary" name="reportSummary" rows="4" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Summary of the report"></textarea>
+        </div>
+      </div>
+
+      <div id="legalTab" class="tab-content hidden">
+        <!-- Legal Details fields -->
+        <div class="grid gap-6 mb-6 md:grid-cols-2">
+          <div>
+            <label for="legalCaseId" class="block mb-2 text-sm font-medium text-gray-900">Case ID</label>
+            <input type="text" id="legalCaseId" name="legalCaseId" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Unique identifier">
+          </div>
+          <div>
+            <label for="legalCaseTitle" class="block mb-2 text-sm font-medium text-gray-900">Case Title</label>
+            <input type="text" id="legalCaseTitle" name="legalCaseTitle" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Title of the legal case">
+          </div>
+          <div>
+            <label for="legalCaseDate" class="block mb-2 text-sm font-medium text-gray-900">Date</label>
+            <input type="date" id="legalCaseDate" name="legalCaseDate" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+          </div>
+          <div>
+            <label for="legalCaseStatus" class="block mb-2 text-sm font-medium text-gray-900">Status</label>
+            <select id="legalCaseStatus" name="legalCaseStatus" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+              <option value="">Select status</option>
+              {statusOptions.map((status) => (
+                <option value={status}>{status}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div>
+          <label for="legalCaseDescription" class="block mb-2 text-sm font-medium text-gray-900">Description</label>
+          <textarea id="legalCaseDescription" name="legalCaseDescription" rows="4" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Description of the legal case"></textarea>
+        </div>
+      </div>
+
+      <div id="additionalNotesTab" class="tab-content hidden">
+        <!-- Additional Notes fields -->
+        <div class="mb-6">
+          <label for="additionalComments" class="block mb-2 text-sm font-medium text-gray-900">Comments</label>
+          <textarea id="additionalComments" name="additionalComments" rows="4" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Any additional comments or notes"></textarea>
+        </div>
+        <div>
+          <label for="additionalAttachments" class="block mb-2 text-sm font-medium text-gray-900">Attachments</label>
+          <input type="file" id="additionalAttachments" name="additionalAttachments" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" multiple>
+          <p class="mt-1 text-sm text-gray-500">Upload any additional attachments or documents</p>
+        </div>
+      </div>
+
+      <div class="flex justify-end mt-4">
+        <button type="button" id="closeModal" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 mr-2">Cancel</button>
+        <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center">Add Incident</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  const searchInput = document.getElementById('table-search') as HTMLInputElement;
+  const tableRows = document.querySelectorAll('tbody tr');
+  const addIncidentBtn = document.getElementById('addIncidentBtn');
+  const addIncidentForm = document.getElementById('addIncidentForm');
+  const closeModalIcon = document.getElementById('closeModalIcon');
+  const dataTable = document.getElementById('dataTable');
+  const newIncidentForm = document.getElementById('newIncidentForm') as HTMLFormElement;
+
+  searchInput.addEventListener('input', function() {
+    const searchTerm = this.value.toLowerCase();
+    tableRows.forEach((row) => {
+      const text = row.textContent?.toLowerCase();
+      if (text?.includes(searchTerm)) {
+        (row as HTMLElement).style.display = '';
+      } else {
+        (row as HTMLElement).style.display = 'none';
+      }
+    });
+  });
+
+  addIncidentBtn?.addEventListener('click', () => {
+    addIncidentForm?.classList.remove('hidden');
+    dataTable?.classList.add('hidden');
+    addIncidentForm?.scrollIntoView({ behavior: 'smooth' });
+  });
+
+  function closeForm() {
+    addIncidentForm?.classList.add('hidden');
+    dataTable?.classList.remove('hidden');
+  }
+
+  closeModalIcon?.addEventListener('click', closeForm);
+
+  newIncidentForm?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    // Here you would typically send the form data to your server
+    // For now, we'll just log it to the console
+    const formData = new FormData(e.target as HTMLFormElement);
+    console.log('New incident:', Object.fromEntries(formData));
+    closeForm();
+  });
+
+  // Add event listener for the cancel button
+  const cancelButton = document.getElementById('closeModal');
+  cancelButton?.addEventListener('click', closeForm);
+
+  // Tab switching functionality
+  const tabButtons = document.querySelectorAll('.tab-button');
+  const tabContents = document.querySelectorAll('.tab-content');
+
+  tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const tabName = button.getAttribute('data-tab');
+      
+      tabButtons.forEach(btn => btn.classList.remove('border-indigo-500', 'text-indigo-600'));
+      tabContents.forEach(content => content.classList.add('hidden'));
+      
+      button.classList.add('border-indigo-500', 'text-indigo-600');
+      document.getElementById(`${tabName}Tab`)?.classList.remove('hidden');
+    });
+  });
+
+  // Set the first tab as active by default
+  (tabButtons[0] as HTMLElement).click();
+</script>
+
+<style>
+  .tab-button {
+    @apply text-gray-500 hover:text-gray-700 hover:border-gray-300;
+  }
+
+  .tab-button.active {
+    @apply border-indigo-500 text-indigo-600;
+  }
+
+  #addIncidentModal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+</style>

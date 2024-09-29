@@ -1,0 +1,30 @@
+---
+// No need for imports here as they're handled in the Hello.astro component
+---
+
+<div id="notesContent" class="min-h-screen bg-white">
+  <div id="editorjs" class="bg-white px-4 py-6"></div>
+</div>
+
+<style>
+  #editorjs {
+    @apply max-w-none;
+  }
+
+  :global(.codex-editor__redactor) {
+    padding-bottom: 300px !important;
+  }
+
+  :global(.ce-block__content),
+  :global(.ce-toolbar__content) {
+    max-width: none;
+  }
+
+  :global(.codex-editor--narrow .ce-toolbar__plus) {
+    left: -30px;
+  }
+
+  :global(.codex-editor--narrow .ce-toolbar__actions) {
+    right: -30px;
+  }
+</style>

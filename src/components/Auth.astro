@@ -1,0 +1,32 @@
+---
+import { NhostClient } from '@nhost/nhost-js';
+
+const nhost = new NhostClient({
+  subdomain: import.meta.env.PUBLIC_NHOST_SUBDOMAIN,
+  region: import.meta.env.PUBLIC_NHOST_REGION
+});
+---
+
+<script>
+  import { NhostClient } from '@nhost/nhost-js';
+
+  const nhost = new NhostClient({
+    subdomain: import.meta.env.PUBLIC_NHOST_SUBDOMAIN,
+    region: import.meta.env.PUBLIC_NHOST_REGION
+  });
+
+  let isAuthenticated = false;
+
+  async function updateAuthState() {
+    isAuthenticated = await nhost.auth.isAuthenticatedAsync();
+    console.log('Auth state updated, isAuthenticated:', isAuthenticated);
+  }
+
+  nhost.auth.onAuthStateChanged((event, session) => {
+    console.log('Auth state changed:', event, session);
+    updateAuthState();
+  });
+
+  // Initial auth state check
+  updateAuthState();
+</script>

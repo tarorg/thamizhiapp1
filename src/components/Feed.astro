@@ -1,0 +1,223 @@
+---
+import { Image } from 'astro:assets';
+import CommentPanel from './CommentPanel.astro';
+
+interface MastodonPost {
+  id: string;
+  created_at: string;
+  account: {
+    display_name: string;
+    username: string;
+    avatar: string;
+    acct: string;
+  };
+  content: string;
+  media_attachments: {
+    type: string;
+    url: string;
+    preview_url: string;
+  }[];
+  favourites_count: number;
+  reblogs_count: number;
+  in_reply_to_id: string | null;
+  favourited: boolean;
+}
+
+const accessToken = import.meta.env.PUBLIC_MASTODON_ACCESS_TOKEN;
+const apiUrl = 'https://thamizhi.xyz/api/v1/timelines/public?local=true&limit=40';
+
+let posts: MastodonPost[] = [];
+let error: string | null = null;
+
+try {
+  const response = await fetch(apiUrl, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  const allPosts = await response.json();
+  console.log(`Received ${allPosts.length} posts from API`);
+  
+  posts = allPosts.filter(post => !post.in_reply_to_id);
+  
+  console.log(`After filtering out replies: ${posts.length} posts`);
+} catch (e) {
+  console.error('Error fetching posts:', e);
+  error = 'Failed to load posts. Please try again later.';
+}
+
+function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  return date.toLocaleString('en-US', { 
+    year: 'numeric', 
+    month: 'short', 
+    day: 'numeric', 
+    hour: '2-digit', 
+    minute: '2-digit',
+    hour12: true 
+  });
+}
+---
+
+<div class="max-w-xl mx-auto">
+  <section id="feed" class="w-full">
+    {error && <p class="text-red-500 text-center py-4">{error}</p>}
+    <div class="space-y-4">
+      {posts.map((post) => (
+        <div class="bg-white border border-gray-200 rounded-lg overflow-hidden mb-4">
+          <div class="p-3">
+            <div class="flex items-center mb-2">
+              <img
+                src={post.account.avatar}
+                alt={post.account.display_name}
+                width="32"
+                height="32"
+                class="rounded-full mr-3 w-8 h-8"
+              />
+              <div>
+                <p class="font-semibold text-sm">{post.account.display_name}</p>
+                <p class="text-xs text-gray-500">@{post.account.username}</p>
+              </div>
+            </div>
+          </div>
+          {post.media_attachments.length > 0 && (
+            <div class="aspect-square">
+              <img
+                src={post.media_attachments[0].url}
+                alt="Post media"
+                class="w-full h-full object-cover"
+              />
+            </div>
+          )}
+          <div class="p-3">
+            <div class="text-sm mb-2">
+              <span set:html={post.content} />
+            </div>
+            <div class="flex justify-between items-center">
+              <p class="text-xs text-gray-500">{formatDate(post.created_at)}</p>
+              <div class="flex space-x-4">
+                <button class="text-gray-400 hover:text-red-500 transition-colors like-button" data-post-id={post.id} data-liked={post.favourited ? 'true' : 'false'}>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                  </svg>
+                </button>
+                <button class="text-gray-400 hover:text-blue-500 transition-colors view-comments-button" data-post-id={post.id}>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                  </svg>
+                </button>
+                <button class="text-gray-400 hover:text-green-500 transition-colors retweet-button" data-post-id={post.id}>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="17 1 21 5 17 9"></polyline>
+                    <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+                    <polyline points="7 23 3 19 7 15"></polyline>
+                    <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+  
+  <CommentPanel />
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const viewCommentsButtons = document.querySelectorAll('.view-comments-button');
+    const likeButtons = document.querySelectorAll('.like-button');
+    const retweetButtons = document.querySelectorAll('.retweet-button');
+    const commentPanel = document.getElementById('comment-panel');
+
+    viewCommentsButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const postId = button.getAttribute('data-post-id');
+        if (commentPanel && postId) {
+          commentPanel.classList.remove('hidden');
+          const event = new CustomEvent('loadComments', { detail: { postId } });
+          document.dispatchEvent(event);
+        }
+      });
+    });
+
+    likeButtons.forEach(button => {
+      const liked = button.getAttribute('data-liked') === 'true';
+      if (liked) {
+        button.classList.add('text-red-500');
+        button.classList.remove('text-gray-400');
+      }
+
+      button.addEventListener('click', async () => {
+        const postId = button.getAttribute('data-post-id');
+        if (postId) {
+          try {
+            const accessToken = localStorage.getItem('mastodon_access_token');
+            if (!accessToken) {
+              throw new Error('Mastodon account not connected');
+            }
+
+            const isLiked = button.classList.contains('text-red-500');
+            const endpoint = isLiked ? 'unfavourite' : 'favourite';
+
+            const response = await fetch(`https://thamizhi.xyz/api/v1/statuses/${postId}/${endpoint}`, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${accessToken}`,
+              },
+            });
+
+            if (response.ok) {
+              button.classList.toggle('text-red-500');
+              button.classList.toggle('text-gray-400');
+              button.setAttribute('data-liked', isLiked ? 'false' : 'true');
+            } else {
+              throw new Error(`Failed to ${isLiked ? 'unlike' : 'like'} post`);
+            }
+          } catch (error) {
+            console.error('Error liking/unliking post:', error);
+            alert(`Failed to ${isLiked ? 'unlike' : 'like'} post. Please try again.`);
+          }
+        }
+      });
+    });
+
+    retweetButtons.forEach(button => {
+      button.addEventListener('click', async () => {
+        const postId = button.getAttribute('data-post-id');
+        if (postId) {
+          try {
+            const accessToken = localStorage.getItem('mastodon_access_token');
+            if (!accessToken) {
+              throw new Error('Mastodon account not connected');
+            }
+
+            const response = await fetch(`https://thamizhi.xyz/api/v1/statuses/${postId}/reblog`, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${accessToken}`,
+              },
+            });
+
+            if (response.ok) {
+              button.classList.toggle('text-green-500');
+              button.classList.toggle('text-gray-400');
+            } else {
+              throw new Error('Failed to retweet post');
+            }
+          } catch (error) {
+            console.error('Error retweeting post:', error);
+            alert('Failed to retweet post. Please try again.');
+          }
+        }
+      });
+    });
+  });
+</script>

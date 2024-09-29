@@ -1,0 +1,57 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SidePanelMenu from '../components/sidepanel.astro';
+import MediaContent from '../components/media.astro';
+import MetadataContent from '../components/metadata.astro';
+import DataContent from '../components/data.astro';
+---
+
+<Layout title="Create Post">
+  <div class="flex flex-col lg:flex-row min-h-screen bg-white">
+    <SidePanelMenu />
+    <div id="main-content" class="flex-1 overflow-hidden transition-all duration-300 bg-white lg:ml-64 ml-0">
+      <div class="p-4 lg:p-8 mt-16 lg:mt-0"> <!-- Added margin-top for small screens -->
+        <MediaContent />
+        <MetadataContent />
+        <DataContent />
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  function showContent(contentId: string) {
+    const contents = ['mediaContent', 'metadataContent', 'dataContent'];
+    contents.forEach(id => {
+      const element = document.getElementById(id);
+      if (element) {
+        element.classList.toggle('hidden', id !== contentId);
+      }
+    });
+  }
+
+  const sidebarLinks = document.querySelectorAll('.sidebar-link');
+  sidebarLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const contentId = link.getAttribute('data-content');
+      if (contentId) {
+        showContent(contentId);
+      }
+    });
+  });
+
+  // Show Media content by default
+  showContent('mediaContent');
+
+  // Handle auto-expanding textarea for the title
+  const titleTextarea = document.getElementById('title') as HTMLTextAreaElement;
+  titleTextarea?.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = (this.scrollHeight) + 'px';
+  });
+</script>
+
+<style>
+  /* Add any additional styles here if needed */
+</style>

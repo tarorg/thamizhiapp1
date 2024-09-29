@@ -1,0 +1,76 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Feed from '../components/Feed.astro';
+import Collections from '../components/Collections.astro';
+import Rag from '../components/rag.astro';
+import Hello from '../components/Hello.astro';
+---
+
+<Layout title="Journalism App">
+  <Header />
+  <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8 h-[calc(100vh-64px)]">
+    <div id="content" class="relative h-full">
+      <div id="feed-section"><Feed /></div>
+      <div id="thamizhi-section" class="hidden"><Rag /></div>
+      <div id="collections-section" class="hidden"><Collections /></div>
+      <div id="hello-section" class="hidden"><Hello /></div>
+    </div>
+  </main>
+</Layout>
+
+<script>
+  function showSection(sectionId: string) {
+    document.querySelectorAll('#content > div').forEach(section => {
+      section.classList.add('hidden');
+    });
+    document.getElementById(sectionId)?.classList.remove('hidden');
+  }
+
+  function handleHashChange() {
+    const hash = window.location.hash;
+    switch (hash) {
+      case '#thamizhi':
+        showSection('thamizhi-section');
+        break;
+      case '#collections':
+        showSection('collections-section');
+        break;
+      case '#hello':
+        showSection('hello-section');
+        break;
+      default:
+        showSection('feed-section');
+    }
+  }
+
+  window.addEventListener('hashchange', handleHashChange);
+  handleHashChange(); // Call once to set initial state
+
+  // Add click event listeners to navigation items
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.preventDefault();
+      const href = item.getAttribute('href');
+      if (href) {
+        window.location.hash = href.replace('/#', '');
+      }
+    });
+  });
+</script>
+
+<style>
+  main {
+    margin: auto;
+    padding: 1rem;
+    width: 100%;
+    max-width: 1200px;
+    color: #333;
+    font-size: 20px;
+    line-height: 1.6;
+    height: calc(100vh - 64px); /* Adjust based on your header height */
+  }
+  #content {
+    height: 100%;
+  }
+</style>

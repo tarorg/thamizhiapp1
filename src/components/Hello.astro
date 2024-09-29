@@ -1,0 +1,119 @@
+---
+import Layout from '../layouts/Layout.astro';
+// Remove the Header import
+---
+
+<Layout title="Hello">
+  <main class="bg-white">
+    <div id="editorjs" class="w-full max-w-none"></div>
+  </main>
+</Layout>
+
+<script>
+    import EditorJS from '@editorjs/editorjs';
+    import Header from '@editorjs/header';
+    import List from '@editorjs/list';
+    import Checklist from '@editorjs/checklist';
+    import Image from '@editorjs/image';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const editor = new EditorJS({
+        holder: 'editorjs',
+        placeholder: 'Start writing here...',
+        tools: {
+          header: {
+            class: Header,
+            config: {
+              levels: [1, 2, 3, 4, 5, 6],
+              defaultLevel: 3,
+              inlineToolbar: true,
+            },
+          },
+          list: List,
+          checklist: Checklist,
+          image: {
+            class: Image,
+            config: {
+              uploader: {
+                uploadByFile(file) {
+                  return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                      resolve({
+                        success: 1,
+                        file: {
+                          url: e.target.result,
+                        },
+                      });
+                    };
+                    reader.readAsDataURL(file);
+                  });
+                },
+              },
+            },
+          },
+        },
+        onReady: () => {
+          console.log('Editor.js is ready to work!');
+        },
+        onChange: (api, event) => {
+          console.log('Content changed', event);
+        },
+      });
+
+      // Expose the editor instance to the global scope for debugging
+      window.editor = editor;
+    });
+</script>
+
+<style>
+  #editorjs {
+    @apply max-w-none;
+  }
+
+  :global(.codex-editor__redactor) {
+    padding-bottom: 300px !important;
+  }
+
+  :global(.ce-block__content),
+  :global(.ce-toolbar__content) {
+    max-width: none;
+  }
+
+  :global(.codex-editor--narrow .ce-toolbar__plus) {
+    left: -30px;
+  }
+
+  :global(.codex-editor--narrow .ce-toolbar__actions) {
+    right: -30px;
+  }
+
+  /* Header styles */
+  :global(.ce-header) {
+    @apply font-bold;
+  }
+
+  :global(h1.ce-header) {
+    @apply text-4xl;
+  }
+
+  :global(h2.ce-header) {
+    @apply text-3xl;
+  }
+
+  :global(h3.ce-header) {
+    @apply text-2xl;
+  }
+
+  :global(h4.ce-header) {
+    @apply text-xl;
+  }
+
+  :global(h5.ce-header) {
+    @apply text-lg;
+  }
+
+  :global(h6.ce-header) {
+    @apply text-base;
+  }
+</style>

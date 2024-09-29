@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Ensure light theme is always applied */
+body {
+  background-color: #ffffff;
+  color: #1a202c;
+}
+
+.bg-white {
+  background-color: #ffffff;
+}
+
+.text-gray-900 {
+  color: #1a202c;
+}
+
+.border-gray-200 {
+  border-color: #e2e8f0;
+}

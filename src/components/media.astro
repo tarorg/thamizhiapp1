@@ -1,0 +1,224 @@
+---
+const collections = ['Genocide', 'Nature', 'Politics', 'Technology', 'Culture'];
+---
+
+<div id="mediaContent" class="h-full overflow-y-auto p-6 bg-white">
+  <h2 class="text-2xl font-bold mb-4">Media Upload</h2>
+  <div id="mediaUploadArea" class="w-full aspect-video bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors duration-300">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+    </svg>
+    <p class="text-sm text-gray-500">Drag and drop your media here, or <span class="text-indigo-600 font-medium">browse</span></p>
+    <p class="text-xs text-gray-400 mt-1">Supports video, audio, and PDF files</p>
+  </div>
+  <input type="file" name="media-file" id="media-file" accept="video/*,audio/*,application/pdf" class="hidden">
+  <div id="mediaPreview" class="mt-4 hidden w-full aspect-video bg-gray-100 rounded-lg overflow-hidden"></div>
+  <div id="uploadControls" class="flex items-center justify-between mt-4">
+    <span id="selected-file" class="text-sm text-gray-500">No file selected</span>
+    <button id="upload-media" class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+      Upload
+    </button>
+  </div>
+  <div id="upload-progress" class="w-full bg-gray-200 rounded-full h-2 mt-4 hidden">
+    <div class="bg-indigo-600 h-2 rounded-full transition-all duration-300 ease-in-out" style="width: 0%"></div>
+  </div>
+</div>
+
+<script>
+  async function uploadToR2(file: File, progressCallback?: (progress: number) => void): Promise<{ success: number; file: { url: string } }> {
+    const filename = `${Date.now()}-${file.name}`;
+    const payload = JSON.stringify({
+      filename: filename,
+      contentType: file.type
+    });
+
+    try {
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: payload
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to get signed URL: ${response.status} ${response.statusText}. Error: ${errorText}`);
+      }
+
+      const { signedUrl, publicUrl } = await response.json();
+
+      // Perform the actual file upload using the signed URL
+      const uploadResponse = await fetch(signedUrl, {
+        method: 'PUT',
+        body: file,
+        headers: {
+          'Content-Type': file.type,
+        },
+      });
+
+      if (!uploadResponse.ok) {
+        const errorText = await uploadResponse.text();
+        throw new Error(`Failed to upload file: ${uploadResponse.statusText}. Error: ${errorText}`);
+      }
+
+      // Simulate progress for the progress bar
+      if (progressCallback) {
+        for (let i = 0; i <= 100; i += 10) {
+          progressCallback(i);
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+      }
+
+      return {
+        success: 1,
+        file: {
+          url: publicUrl,
+        },
+      };
+    } catch (error) {
+      console.error('Error in uploadToR2:', error);
+      throw error;
+    }
+  }
+
+  // Media file handling
+  const mediaUploadArea = document.getElementById('mediaUploadArea');
+  const mediaFileInput = document.getElementById('media-file') as HTMLInputElement;
+  const mediaPreview = document.getElementById('mediaPreview');
+  const uploadControls = document.getElementById('uploadControls');
+  const selectedFileSpan = document.getElementById('selected-file');
+  const uploadMediaButton = document.getElementById('upload-media') as HTMLButtonElement;
+  const uploadProgressBar = document.getElementById('upload-progress');
+  const uploadProgressBarFill = uploadProgressBar?.querySelector('div');
+
+  mediaUploadArea?.addEventListener('click', () => {
+    mediaFileInput?.click();
+  });
+
+  mediaUploadArea?.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    mediaUploadArea.classList.add('bg-gray-50');
+  });
+
+  mediaUploadArea?.addEventListener('dragleave', () => {
+    mediaUploadArea.classList.remove('bg-gray-50');
+  });
+
+  mediaUploadArea?.addEventListener('drop', (e) => {
+    e.preventDefault();
+    mediaUploadArea.classList.remove('bg-gray-50');
+    if (e.dataTransfer?.files.length) {
+      mediaFileInput.files = e.dataTransfer.files;
+      handleFileSelection();
+    }
+  });
+
+  function handleFileSelection() {
+    const file = mediaFileInput?.files?.[0];
+    if (file && selectedFileSpan && uploadMediaButton) {
+      selectedFileSpan.textContent = file.name;
+      previewMedia(file);
+      mediaUploadArea?.classList.add('hidden');
+      mediaPreview?.classList.remove('hidden');
+      uploadMediaButton.disabled = false;
+      uploadControls?.classList.remove('hidden');
+    } else if (selectedFileSpan && uploadMediaButton) {
+      selectedFileSpan.textContent = 'No file selected';
+      mediaUploadArea?.classList.remove('hidden');
+      mediaPreview?.classList.add('hidden');
+      uploadMediaButton.disabled = true;
+    }
+  }
+
+  mediaFileInput?.addEventListener('change', handleFileSelection);
+
+  function previewMedia(file: File) {
+    if (!mediaPreview) return;
+
+    const fileType = file.type.split('/')[0];
+    let previewElement: HTMLElement;
+
+    switch (fileType) {
+      case 'video':
+        previewElement = document.createElement('video');
+        (previewElement as HTMLVideoElement).src = URL.createObjectURL(file);
+        previewElement.className = 'w-full h-full object-cover';
+        (previewElement as HTMLVideoElement).controls = true;
+        (previewElement as HTMLVideoElement).autoplay = true;
+        (previewElement as HTMLVideoElement).loop = true;
+        (previewElement as HTMLVideoElement).muted = true;
+        break;
+      case 'audio':
+        previewElement = document.createElement('div');
+        previewElement.className = 'w-full h-full bg-gray-100 flex items-center justify-center';
+        const audio = document.createElement('audio') as HTMLAudioElement;
+        audio.src = URL.createObjectURL(file);
+        audio.className = 'w-full max-w-md';
+        audio.controls = true;
+        previewElement.appendChild(audio);
+        break;
+      case 'application':
+        if (file.type === 'application/pdf') {
+          previewElement = document.createElement('div');
+          previewElement.className = 'w-full h-full bg-gray-100 flex items-center justify-center';
+          const pdfIcon = document.createElement('div');
+          pdfIcon.className = 'text-6xl text-gray-400';
+          pdfIcon.innerHTML = '📄';
+          const pdfText = document.createElement('div');
+          pdfText.className = 'mt-2 text-gray-600';
+          pdfText.textContent = file.name;
+          previewElement.appendChild(pdfIcon);
+          previewElement.appendChild(pdfText);
+        } else {
+          previewElement = document.createElement('div');
+          previewElement.className = 'w-full h-full flex items-center justify-center text-gray-500';
+          previewElement.textContent = 'Preview not available for this file type';
+        }
+        break;
+      default:
+        previewElement = document.createElement('div');
+        previewElement.className = 'w-full h-full flex items-center justify-center text-gray-500';
+        previewElement.textContent = 'Preview not available for this file type';
+    }
+
+    mediaPreview.innerHTML = '';
+    mediaPreview.appendChild(previewElement);
+  }
+
+  uploadMediaButton?.addEventListener('click', async () => {
+    const file = mediaFileInput?.files?.[0];
+    if (file) {
+      try {
+        uploadProgressBar?.classList.remove('hidden');
+        uploadMediaButton.disabled = true;
+        const result = await uploadToR2(file, updateProgress);
+        console.log('Media uploaded successfully:', result);
+        
+        // Keep the preview visible
+        mediaPreview?.classList.remove('hidden');
+        
+        // Hide upload controls
+        uploadControls?.classList.add('hidden');
+      } catch (error) {
+        console.error('Failed to upload media:', error);
+        alert('Failed to upload media. Please try again.');
+      } finally {
+        uploadProgressBar?.classList.add('hidden');
+        if (uploadProgressBarFill) uploadProgressBarFill.style.width = '0%';
+      }
+    } else {
+      alert('Please select a file to upload.');
+    }
+  });
+
+  function updateProgress(progress: number) {
+    if (uploadProgressBarFill) {
+      uploadProgressBarFill.style.width = `${progress}%`;
+    }
+  }
+</script>
+
+<style>
+  /* Add any specific styles for the media component here */
+</style>

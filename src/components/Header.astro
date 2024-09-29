@@ -1,0 +1,162 @@
+---
+import { NhostClient } from '@nhost/nhost-js';
+
+const nhost = new NhostClient({
+  subdomain: import.meta.env.PUBLIC_NHOST_SUBDOMAIN,
+  region: import.meta.env.PUBLIC_NHOST_REGION
+});
+---
+
+<header class="bg-white border-b border-gray-200">
+  <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between h-16">
+      <div class="flex">
+        <div class="flex-shrink-0 flex items-center">
+          <img src="/icons8-asterisk.svg" alt="Logo" class="h-8 w-auto" />
+        </div>
+        <div class="hidden md:ml-6 md:flex md:space-x-8">
+          <a href="/" class="nav-item border-transparent text-gray-500 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+            feed
+          </a>
+          <a href="/#thamizhi" class="nav-item border-transparent text-gray-500 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+            thamizhi ai
+          </a>
+          <a href="/#collections" class="nav-item border-transparent text-gray-500 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+            collections
+          </a>
+          <a href="/#hello" class="nav-item border-transparent text-gray-500 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+            hello
+          </a>
+        </div>
+      </div>
+      <div class="hidden md:ml-6 md:flex md:items-center">
+        <button id="profile-icon" class="text-gray-400 hover:text-gray-500">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        </button>
+      </div>
+      <div class="md:hidden flex items-center">
+        <button id="mobile-menu-button" class="text-gray-400 hover:text-gray-500">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+  <div id="mobile-menu" class="hidden md:hidden">
+    <div class="px-2 pt-2 pb-3 space-y-1">
+      <a href="/" class="nav-item block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">feed</a>
+      <a href="/#thamizhi" class="nav-item block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">thamizhi ai</a>
+      <a href="/#collections" class="nav-item block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">collections</a>
+      <a href="/#hello" class="nav-item block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">hello</a>
+    </div>
+  </div>
+</header>
+
+<script>
+  import { NhostClient } from '@nhost/nhost-js';
+
+  const nhost = new NhostClient({
+    subdomain: import.meta.env.PUBLIC_NHOST_SUBDOMAIN,
+    region: import.meta.env.PUBLIC_NHOST_REGION
+  });
+
+  const profileIcon = document.getElementById('profile-icon');
+  const mobileMenuButton = document.getElementById('mobile-menu-button');
+  const mobileMenu = document.getElementById('mobile-menu');
+  let isAuthenticated = false;
+
+  async function updateAuthState() {
+    isAuthenticated = await nhost.auth.isAuthenticatedAsync();
+    console.log('Is authenticated:', isAuthenticated);
+  }
+
+  async function handleProfileClick(e: Event) {
+    e.preventDefault();
+    try {
+      if (!isAuthenticated) {
+        console.log('Not authenticated. Starting Google sign-in process...');
+        const signInResponse = await nhost.auth.signIn({
+          provider: 'google',
+          options: {
+            redirectTo: window.location.origin + '/settings'
+          }
+        });
+        console.log('Sign-in response:', signInResponse);
+
+        if (signInResponse.error) {
+          console.error('Sign-in error:', signInResponse.error);
+        } else {
+          console.log('Sign-in initiated');
+          // The user will be redirected to Google for authentication
+        }
+      } else {
+        console.log('Already authenticated. Redirecting to settings...');
+        window.location.href = '/settings';
+      }
+    } catch (error) {
+      console.error('Error during authentication process:', error);
+    }
+  }
+
+  profileIcon?.addEventListener('click', handleProfileClick);
+
+  // Mobile menu toggle
+  mobileMenuButton?.addEventListener('click', () => {
+    mobileMenu?.classList.toggle('hidden');
+  });
+
+  // Initial auth state check
+  updateAuthState();
+
+  nhost.auth.onAuthStateChanged((event, session) => {
+    console.log('Auth state changed:', event, session);
+    updateAuthState();
+  });
+
+  function updateActiveTab() {
+    const currentPath = window.location.pathname;
+    const currentHash = window.location.hash;
+    const navItems = document.querySelectorAll('.nav-item');
+
+    navItems.forEach(item => {
+      const href = item.getAttribute('href');
+      if (
+        (href === '/' && currentPath === '/' && !currentHash) ||
+        (href === '/#thamizhi' && currentHash === '#thamizhi') ||
+        (href === '/#collections' && currentHash === '#collections') ||
+        (href === '/#hello' && currentHash === '#hello')
+      ) {
+        item.classList.add('border-indigo-500', 'text-gray-900');
+        item.classList.remove('border-transparent', 'text-gray-500');
+      } else {
+        item.classList.remove('border-indigo-500', 'text-gray-900');
+        item.classList.add('border-transparent', 'text-gray-500');
+      }
+    });
+  }
+
+  // Update active tab on page load and hash change
+  window.addEventListener('load', updateActiveTab);
+  window.addEventListener('hashchange', updateActiveTab);
+
+  // Add click event listeners to navigation items
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.preventDefault();
+      const href = item.getAttribute('href');
+      if (href) {
+        if (href === '/') {
+          window.location.href = '/';
+        } else {
+          window.location.href = href;
+        }
+      }
+      updateActiveTab();
+      // Close mobile menu when an item is clicked
+      mobileMenu?.classList.add('hidden');
+    });
+  });
+</script>
