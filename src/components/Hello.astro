@@ -15,6 +15,17 @@ import Layout from '../layouts/Layout.astro';
     import List from '@editorjs/list';
     import Checklist from '@editorjs/checklist';
     import Image from '@editorjs/image';
+    // New imports
+    import Paragraph from '@editorjs/paragraph';
+    import Quote from '@editorjs/quote';
+    import Warning from '@editorjs/warning';
+    import Delimiter from '@editorjs/delimiter';
+    import NestedList from '@editorjs/nested-list';
+    import LinkTool from '@editorjs/link';
+    import Embed from '@editorjs/embed';
+    import Table from 'editorjs-table';
+    import Button from 'editorjs-button';
+    import Undo from 'editorjs-undo';
 
     document.addEventListener('DOMContentLoaded', () => {
       const editor = new EditorJS({
@@ -29,22 +40,48 @@ import Layout from '../layouts/Layout.astro';
               inlineToolbar: true,
             },
           },
-          list: List,
-          checklist: Checklist,
+          paragraph: {
+            class: Paragraph,
+            inlineToolbar: true,
+          },
+          list: {
+            class: List,
+            inlineToolbar: true,
+          },
+          nestedList: {
+            class: NestedList,
+            inlineToolbar: true,
+          },
+          checklist: {
+            class: Checklist,
+            inlineToolbar: true,
+          },
+          quote: Quote,
+          warning: Warning,
+          delimiter: Delimiter,
+          linkTool: LinkTool,
+          embed: Embed,
+          table: {
+            class: Table,
+            inlineToolbar: true,
+          },
+          button: Button,
           image: {
             class: Image,
             config: {
               uploader: {
-                uploadByFile(file) {
+                uploadByFile(file: File) {
                   return new Promise((resolve) => {
                     const reader = new FileReader();
                     reader.onload = (e) => {
-                      resolve({
-                        success: 1,
-                        file: {
-                          url: e.target.result,
-                        },
-                      });
+                      if (e.target && e.target.result) {
+                        resolve({
+                          success: 1,
+                          file: {
+                            url: e.target.result,
+                          },
+                        });
+                      }
                     };
                     reader.readAsDataURL(file);
                   });
@@ -55,14 +92,17 @@ import Layout from '../layouts/Layout.astro';
         },
         onReady: () => {
           console.log('Editor.js is ready to work!');
+          // Initialize Undo plugin
+          const undo = new Undo({ editor });
+          undo.initialize(editor);
         },
-        onChange: (api, event) => {
+        onChange: (api: EditorJS, event: CustomEvent) => {
           console.log('Content changed', event);
         },
       });
 
       // Expose the editor instance to the global scope for debugging
-      window.editor = editor;
+      (window as any).editor = editor;
     });
 </script>
 
