@@ -1,6 +1,5 @@
 ---
 import Layout from '../layouts/Layout.astro';
-// Remove the Header import
 ---
 
 <Layout title="Hello">
@@ -15,17 +14,11 @@ import Layout from '../layouts/Layout.astro';
     import List from '@editorjs/list';
     import Checklist from '@editorjs/checklist';
     import Image from '@editorjs/image';
-    // New imports
-    import Paragraph from '@editorjs/paragraph';
     import Quote from '@editorjs/quote';
     import Warning from '@editorjs/warning';
     import Delimiter from '@editorjs/delimiter';
-    import NestedList from '@editorjs/nested-list';
     import LinkTool from '@editorjs/link';
     import Embed from '@editorjs/embed';
-    import Table from 'editorjs-table';
-    import Button from 'editorjs-button';
-    import Undo from 'editorjs-undo';
 
     document.addEventListener('DOMContentLoaded', () => {
       const editor = new EditorJS({
@@ -37,20 +30,15 @@ import Layout from '../layouts/Layout.astro';
             config: {
               levels: [1, 2, 3, 4, 5, 6],
               defaultLevel: 3,
-              inlineToolbar: true,
+              inlineToolbar: ['link', 'bold', 'italic'],
             },
           },
           paragraph: {
-            class: Paragraph,
-            inlineToolbar: true,
+            inlineToolbar: ['link', 'bold', 'italic'],
           },
           list: {
             class: List,
-            inlineToolbar: true,
-          },
-          nestedList: {
-            class: NestedList,
-            inlineToolbar: true,
+            inlineToolbar: ['link', 'bold', 'italic'],
           },
           checklist: {
             class: Checklist,
@@ -61,11 +49,6 @@ import Layout from '../layouts/Layout.astro';
           delimiter: Delimiter,
           linkTool: LinkTool,
           embed: Embed,
-          table: {
-            class: Table,
-            inlineToolbar: true,
-          },
-          button: Button,
           image: {
             class: Image,
             config: {
@@ -78,7 +61,7 @@ import Layout from '../layouts/Layout.astro';
                         resolve({
                           success: 1,
                           file: {
-                            url: e.target.result,
+                            url: e.target.result as string,
                           },
                         });
                       }
@@ -92,11 +75,8 @@ import Layout from '../layouts/Layout.astro';
         },
         onReady: () => {
           console.log('Editor.js is ready to work!');
-          // Initialize Undo plugin
-          const undo = new Undo({ editor });
-          undo.initialize(editor);
         },
-        onChange: (api: EditorJS, event: CustomEvent) => {
+        onChange: (api: unknown, event: CustomEvent) => {
           console.log('Content changed', event);
         },
       });
@@ -155,5 +135,24 @@ import Layout from '../layouts/Layout.astro';
 
   :global(h6.ce-header) {
     @apply text-base;
+  }
+
+  /* Embed tool styles */
+  :global(.embed-tool) {
+    margin-bottom: 15px;
+  }
+
+  :global(.embed-tool__caption) {
+    margin-top: 10px;
+  }
+
+  :global(.cdx-input) {
+    padding: 10px;
+    margin-top: 5px;
+  }
+
+  :global(.embed-tool__caption:empty::before) {
+    content: attr(data-placeholder);
+    color: #707684;
   }
 </style>
